@@ -6,9 +6,9 @@
 
 | Artifact | Purpose |
 |----------|---------|
-| `titanic_analysis.ipynb` | Primary deliverable: EDA, visualizations, interpretations, ML experiments |
+| `run_analytics.py` | Primary deliverable: EDA, visualizations, interpretations, ML experiments (executable Python script) |
 | `cache_titanic.py` | One-time loader: `sns.load_dataset('titanic')` → `titanic.csv` |
-| `titanic.csv` | Cached cleaned dataset — all notebook cells read from here, never reload raw |
+| `titanic.csv` | Cached cleaned dataset — all script reads from here, never reload raw |
 
 ### Data flow
 

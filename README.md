@@ -56,7 +56,7 @@ python run_pipeline.py
 
 ```bash
 cd analytics
-jupyter notebook titanic_analysis.ipynb
+python run_analytics.py
 ```
 
 ### Module 3 — Support Assistant (`/support_assistant`)

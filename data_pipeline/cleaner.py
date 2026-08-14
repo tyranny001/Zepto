@@ -54,7 +54,7 @@ def clean_books(raw_books: list[RawBook]) -> pd.DataFrame:
                 "title": book.title.strip(),
                 "price_gbp_raw": price,
                 "rating_raw": rating,
-                "in_stock": int(in_stock),
+                "in_stock": in_stock,
                 "category": book.category.strip() or "Unknown",
             }
         )

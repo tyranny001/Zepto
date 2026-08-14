@@ -9,7 +9,7 @@ import pandas as pd
 
 QUERIES: list[tuple[str, str]] = [
     (
-        "Q1 — SELECT/WHERE: in-stock books rated 4 or 5",
+        "Q1 -- SELECT/WHERE: in-stock books rated 4 or 5",
         """
         SELECT title, rating, in_stock
         FROM books
@@ -19,7 +19,7 @@ QUERIES: list[tuple[str, str]] = [
         """,
     ),
     (
-        "Q2 — ORDER BY + LIMIT: top 10 highest-rated books",
+        "Q2 -- ORDER BY + LIMIT: top 10 highest-rated books",
         """
         SELECT title, rating, price_inr
         FROM books
@@ -28,7 +28,7 @@ QUERIES: list[tuple[str, str]] = [
         """,
     ),
     (
-        "Q3 — DISTINCT: unique categories in catalogue",
+        "Q3 -- DISTINCT: unique categories in catalogue",
         """
         SELECT DISTINCT category_name
         FROM categories
@@ -36,7 +36,7 @@ QUERIES: list[tuple[str, str]] = [
         """,
     ),
     (
-        "Q4 — IN: books in Poetry, Travel, or Mystery categories",
+        "Q4 -- IN: books in Poetry, Travel, or Mystery categories",
         """
         SELECT b.title, c.category_name, b.price_gbp
         FROM books b
@@ -47,7 +47,7 @@ QUERIES: list[tuple[str, str]] = [
         """,
     ),
     (
-        "Q5 — JOIN + BETWEEN: mid-range INR prices with category names",
+        "Q5 -- JOIN + BETWEEN: mid-range INR prices with category names",
         """
         SELECT b.title, c.category_name, b.price_inr, b.rating
         FROM books b

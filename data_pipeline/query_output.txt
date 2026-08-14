@@ -1,4 +1,4 @@
-=== Q1 — SELECT/WHERE: in-stock books rated 4 or 5 ===
+=== Q1 -- SELECT/WHERE: in-stock books rated 4 or 5 ===
 SELECT title, rating, in_stock
         FROM books
         WHERE in_stock = 1 AND rating >= 4
@@ -21,7 +21,7 @@ Princess Jellyfish 2-in-1 Omnibus, Vol. 01 (Princess Jellyfish 2-in-1 Omnibus #1
                                                                 The Elephant Tree       5         1
                        The Four Agreements: A Practical Guide to Personal Freedom       5         1
 
-=== Q2 — ORDER BY + LIMIT: top 10 highest-rated books ===
+=== Q2 -- ORDER BY + LIMIT: top 10 highest-rated books ===
 SELECT title, rating, price_inr
         FROM books
         ORDER BY rating DESC, price_inr ASC
@@ -38,17 +38,15 @@ The Inefficiency Assassin: Time Management Tactics for Working Smarter, Not Long
                                                                  The Elephant Tree       5    2513.01
                                                         Chase Me (Paris Nights #2)       5    2665.98
 
-=== Q3 — DISTINCT: unique categories in catalogue ===
+=== Q3 -- DISTINCT: unique categories in catalogue ===
 SELECT DISTINCT category_name
         FROM categories
         ORDER BY category_name
      category_name
-     Add a comment
                Art
           Business
          Childrens
       Contemporary
-           Default
            Fantasy
            Fiction
     Food and Drink
@@ -71,9 +69,10 @@ Historical Fiction
       Spirituality
           Thriller
             Travel
+           Unknown
        Young Adult
 
-=== Q4 — IN: books in Poetry, Travel, or Mystery categories ===
+=== Q4 -- IN: books in Poetry, Travel, or Mystery categories ===
 SELECT b.title, c.category_name, b.price_gbp
         FROM books b
         JOIN categories c ON b.category_id = c.category_id
@@ -93,7 +92,7 @@ Untitled Collection: Sabbath Poems 2014        Poetry      14.27
          You can't bury them all: Poems        Poetry      33.63
                 It's Only the Himalayas        Travel      45.17
 
-=== Q5 — JOIN + BETWEEN: mid-range INR prices with category names ===
+=== Q5 -- JOIN + BETWEEN: mid-range INR prices with category names ===
 SELECT b.title, c.category_name, b.price_inr, b.rating
         FROM books b
         JOIN categories c ON b.category_id = c.category_id
@@ -106,14 +105,14 @@ SELECT b.title, c.category_name, b.price_inr, b.rating
                                                 Unbound: How Eight Technologies Made Us Human, Transformed Society, and Brought Our World to the Brink        History    2692.36       1
                                                                                                                             Chase Me (Paris Nights #2)        Romance    2665.98       5
                                                                                                          Saga, Volume 6 (Saga (Collected Editions) #6)        Fantasy    2639.61       3
-The Mindfulness and Acceptance Workbook for Anxiety: A Guide to Breaking Free from Anxiety, Phobias, and Worry Using Acceptance and Commitment Therapy  Add a comment    2520.40       4
+The Mindfulness and Acceptance Workbook for Anxiety: A Guide to Breaking Free from Anxiety, Phobias, and Worry Using Acceptance and Commitment Therapy        Unknown    2520.40       4
                                                                                                                                                   Olio         Poetry    2519.34       1
                                                                                                                                      The Elephant Tree       Thriller    2513.01       5
                                                                                     #HigherSelfie: Wake Up Your Life. Free Your Soul. Find Your Tribe.     Nonfiction    2438.10       5
                                                                                                                                        The Requiem Red    Young Adult    2389.57       1
-                                                        The Boys in the Boat: Nine Americans and Their Epic Quest for Gold at the 1936 Berlin Olympics        Default    2384.30       4
-                                           America's Cradle of Quarterbacks: Western Pennsylvania's Football Factory from Johnny Unitas to Joe Montana        Default    2373.75       3
+                                                        The Boys in the Boat: Nine Americans and Their Epic Quest for Gold at the 1936 Berlin Olympics        Unknown    2384.30       4
+                                           America's Cradle of Quarterbacks: Western Pennsylvania's Football Factory from Johnny Unitas to Joe Montana        Unknown    2373.75       3
                                                                                                              In the Country We Love: My Family Divided     Nonfiction    2321.00       4
                                                                                                                                  Shakespeare's Sonnets         Poetry    2179.63       4
-                                                                    The Inefficiency Assassin: Time Management Tactics for Working Smarter, Not Longer        Default    2172.24       5
+                                                                    The Inefficiency Assassin: Time Management Tactics for Working Smarter, Not Longer        Unknown    2172.24       5
                                                                                                Lumberjanes Vol. 3: A Terrible Plan (Lumberjanes #9-12) Sequential Art    2101.56       2

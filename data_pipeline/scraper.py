@@ -53,11 +53,22 @@ def _parse_book_detail(url: str, session: requests.Session) -> RawBook:
     availability = soup.select_one(".availability")
     breadcrumb = soup.select_one(".breadcrumb")
 
+    # Breadcrumb structure: Home > Books > <Category> > <Book Title>
+    # We want the actual category, which is the third crumb (index 2 in the
+    # <li> list, but index 1 among <a> tags since the last <li> has no <a>).
     category = "Unknown"
     if breadcrumb:
-        crumbs = [a.get_text(strip=True) for a in breadcrumb.select("a")]
-        if len(crumbs) >= 2:
-            category = crumbs[-1]
+        crumbs = [li.get_text(strip=True) for li in breadcrumb.select("li")]
+        # crumbs = ["Home", "Books", "<Category>", "<Title>"]
+        if len(crumbs) >= 3:
+            candidate = crumbs[2].strip()
+            # Filter known bad values: spurious breadcrumbs, meta-text, generic defaults
+            bad_categories = {
+                "add a comment", "default", "books", "home", "", "unknown",
+                "none", "other", "misc", "uncategorized", "n/a"
+            }
+            if candidate and candidate.lower() not in bad_categories:
+                category = candidate
 
     star_class = ""
     if rating_tag and rating_tag.get("class"):

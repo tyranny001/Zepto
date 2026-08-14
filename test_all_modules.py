@@ -71,8 +71,8 @@ def test_module1():
             print("✗ FAIL: query_output.txt not found")
             return False
         
-        query_output = query_path.read_text()
-        if "=== Q1 —" in query_output and "=== Q5 —" in query_output:
+        query_output = query_path.read_text(encoding="utf-8")
+        if "=== Q1 --" in query_output and "=== Q5 --" in query_output:
             print("✓ Query output file present with required queries")
         else:
             print(f"Query output starts with: {query_output[:100]}")
@@ -97,7 +97,6 @@ def test_module2():
     
     try:
         import pandas as pd
-        from pathlib import Path
         
         # Check titanic.csv
         titanic_path = Path("analytics/titanic.csv")
@@ -165,7 +164,6 @@ def test_module3():
     
     try:
         import sys
-        from pathlib import Path
         sys.path.insert(0, str(Path("support_assistant")))
         
         from app.main import app
