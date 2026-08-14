@@ -5,12 +5,12 @@ from __future__ import annotations
 from pathlib import Path
 
 from cleaner import clean_books
-from db import init_db, load_dataframe, read_tables
+from database import init_db, load_dataframe, read_tables
 from queries import compare_join_results, run_queries
 from scraper import scrape_books
 
-DB_PATH = Path(__file__).resolve().parent / "books.db"
-OUTPUT_PATH = Path(__file__).resolve().parent / "query_output.txt"
+DB_PATH = Path(__file__).resolve().parent / "data" / "books.db"
+OUTPUT_PATH = Path(__file__).resolve().parent / "outputs" / "sql_results.txt"
 
 
 def main() -> None:
