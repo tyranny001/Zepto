@@ -71,13 +71,11 @@ uvicorn app.main:app --reload
 
 ## Design decisions (summary)
 
-<!-- Per-module summaries added during Sprint 7 -->
-
 | Module | Key decisions |
 |--------|---------------|
-| Data Pipeline | _TBD_ |
-| Analytics | _TBD_ |
-| Support Assistant | _TBD_ |
+| **Data Pipeline (Module 1)** | Scrape books.toscrape.com 5 listing pages (100+ books, 25+ categories). Two-table PK/FK schema (categories ↔ books). Fixed conversion: 1 GBP = 105.50 INR. ≥5 SQL queries covering SELECT/WHERE, ORDER BY, LIMIT, DISTINCT, IN, JOIN. Pandas equivalence check validates join results match SQL. |
+| **Analytics (Module 2)** | Load Titanic once via sns.load_dataset(), save as titanic.csv offline fallback. Part A: profile, clean (missing-value thresholds), EDA with ≥4 interpreted charts, correlation matrix (6 specified columns), standardization check. Part B: stratified split, leak-safe ColumnTransformer pipeline, 3 classifiers (DT/RF/LR), full metric suite, 3-way imbalance comparison (baseline/class_weight/SMOTE), GridSearchCV + OOB, regression side-task (fare prediction), joblib pipeline save/reload. |
+| **Support Assistant (Module 3)** | 8 Zepto policy documents, chunked per-document, embedded with all-MiniLM-L6-v2 (384 dims). LangGraph 3-node agent: classify_intent (keyword heuristic MOCK_LLM=1, optional LLM MOCK_LLM=0), retrieve_and_answer (top-3 via cosine sim), direct_answer (canned strings). Structured prompt template with 5 skeleton components + negative constraint + few-shot. Pydantic schema (answer/sources/confidence). FastAPI /ask endpoint. MOCK_LLM=1 (graded baseline, fully offline) vs MOCK_LLM=0 (optional real LLM). |
 
 ## Git workflow
 
