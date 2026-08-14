@@ -1,0 +1,2 @@
+Model,MAE,RMSE,R²,Adjusted R²
+Linear Regression (Fare),23.33,47.95,0.3507,0.3292
