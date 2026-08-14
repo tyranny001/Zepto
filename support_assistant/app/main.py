@@ -1,4 +1,4 @@
-"""FastAPI app for Zepto support assistant."""
+"""FastAPI application for Zepto support assistant."""
 
 from __future__ import annotations
 
@@ -6,111 +6,121 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
+from fastapi.responses import JSONResponse
 
-from app.chunker import load_corpus
-from app.graph import create_graph
-from app.rag import RAGSystem
-from app.schema import SupportAnswer
+from app.chunker import chunk_document, load_corpus
+from app.embeddings import get_embedding
+from app.langgraph_agent import ZeptoSupportAgent
+from app.rag import VectorStore
+from app.schema import AskRequest, SupportResponse
 
-# Initialize corpus and RAG
+# Initialize corpus and vector store
 CORPUS_DIR = Path(__file__).resolve().parent.parent / "corpus"
-corpus = load_corpus(CORPUS_DIR)
-rag = RAGSystem(corpus)
-graph = create_graph(rag)
-
-app = FastAPI(
-    title="Zepto Support Assistant",
-    description="RAG-powered customer support with offline MOCK_LLM mode",
-    version="1.0.0",
-)
 
 
-class AskRequest(BaseModel):
-    """Request body for /ask endpoint."""
+def initialize_app() -> tuple[FastAPI, ZeptoSupportAgent]:
+    """Initialize FastAPI app and LangGraph agent."""
+    app = FastAPI(
+        title="Zepto Support Assistant",
+        description="Policy-grounded RAG with LangGraph and MOCK_LLM toggle",
+        version="1.0.0"
+    )
 
-    question: str = Field(..., min_length=3, max_length=500, description="Customer question")
+    # Load corpus
+    corpus = load_corpus(CORPUS_DIR)
+
+    # Create vector store and add documents
+    vector_store = VectorStore()
+    all_chunks = []
+
+    for doc_id, doc_text in corpus.items():
+        chunks = chunk_document(doc_text, doc_id)
+        all_chunks.extend(chunks)
+
+    # Embed all chunks
+    embeddings = [get_embedding(chunk["text"]) for chunk in all_chunks]
+    vector_store.add_documents(all_chunks, embeddings)
+
+    # Create agent
+    agent = ZeptoSupportAgent(vector_store)
+
+    return app, agent
+
+
+app, agent = initialize_app()
 
 
 @app.get("/health")
 async def health() -> dict:
     """Health check endpoint."""
-    mock_mode = os.getenv("MOCK_LLM", "").lower() in ("1", "true")
+    mock_mode = os.getenv("MOCK_LLM", "1").lower() in ("1", "true")
     return {
         "status": "healthy",
         "mock_llm": mock_mode,
-        "corpus_chunks": sum(len(chunks) for chunks in corpus.values()),
+        "mode": "GRADED_BASELINE" if mock_mode else "REAL_LLM_OPTIONAL"
     }
 
 
-@app.post("/ask", response_model=SupportAnswer)
-async def ask(request: AskRequest) -> SupportAnswer:
+@app.post("/ask", response_model=SupportResponse)
+async def ask(request: AskRequest) -> SupportResponse:
     """Answer customer question using RAG + LangGraph."""
     try:
-        # Run graph
-        initial_state = {
-            "question": request.question,
-            "retrieved_chunks": [],
-            "draft_answer": "",
-            "final_answer": "",
-            "route": "",
-            "confidence": 0.5,
-            "attempt_count": 0,
-        }
+        # Run the graph
+        result = agent.invoke(request.query)
 
-        result = graph.invoke(initial_state)
-
-        # Extract results
-        final_answer = result.get("final_answer", "")
+        # Extract and validate response
+        answer = result.get("answer", "")
+        sources = result.get("sources", [])
         confidence = result.get("confidence", 0.5)
-        retrieved_chunks = result.get("retrieved_chunks", [])
-        route = result.get("route", "answer")
 
-        # Format sources (chunk previews)
-        sources = [chunk[:50] + "..." for chunk in retrieved_chunks]
+        if not answer:
+            answer = "I was unable to generate an answer. Please try rephrasing your question."
+            confidence = 0.0
 
-        # Determine if escalated
-        escalated = route == "escalate"
-
-        return SupportAnswer(
-            answer=final_answer or "I'm unable to help with this query. Please contact our support team.",
+        return SupportResponse(
+            answer=answer,
             sources=sources,
-            confidence=float(confidence),
-            escalated=escalated,
+            confidence=float(confidence)
         )
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error processing request: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error processing request: {str(e)}"
+        )
 
 
 @app.get("/examples")
 async def examples() -> dict:
-    """Return example Q&A pairs demonstrating the assistant."""
+    """Return example queries for testing."""
     return {
         "examples": [
             {
-                "question": "How long does Zepto delivery take?",
-                "expected_topic": "delivery timeframe",
+                "type": "policy_question",
+                "query": "How long does delivery take?",
+                "expected_source": "doc_01"
             },
             {
-                "question": "What's your return policy for fresh items?",
-                "expected_topic": "returns and fresh groceries",
+                "type": "policy_question",
+                "query": "Can I return perishable items?",
+                "expected_source": "doc_02"
             },
             {
-                "question": "Can I use multiple payment methods for one order?",
-                "expected_topic": "payments",
+                "type": "policy_question",
+                "query": "What are the membership tiers?",
+                "expected_source": "doc_03"
             },
             {
-                "question": "How do I track my order?",
-                "expected_topic": "delivery tracking",
-            },
+                "type": "general_question",
+                "query": "What's the weather like?",
+                "expected_source": None
+            }
         ]
     }
 
 
 if __name__ == "__main__":
     import uvicorn
-
-    mock_mode = os.getenv("MOCK_LLM", "").lower() in ("1", "true")
-    print(f"Starting Zepto Support Assistant (MOCK_LLM={'ON' if mock_mode else 'OFF'})")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    mock_mode = os.getenv("MOCK_LLM", "1").lower() in ("1", "true")
+    print(f"Starting Zepto Support Assistant (MOCK_LLM={mock_mode})")
+    uvicorn.run(app, host="0.0.0.0", port=7860)

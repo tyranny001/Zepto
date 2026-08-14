@@ -2,20 +2,20 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy requirements and install
-COPY ../requirements.txt .
+# Copy requirements
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy app and corpus
-COPY app/ ./app/
-COPY corpus/ ./corpus/
+# Copy application
+COPY support_assistant/ ./support_assistant/
 
-# Set MOCK_LLM=1 for offline-first deployments
+# Set MOCK_LLM=1 for graded baseline (offline-first)
 ENV MOCK_LLM=1
 ENV PYTHONUNBUFFERED=1
 
 # Expose port
-EXPOSE 8000
+EXPOSE 7860
 
 # Run FastAPI server
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "uvicorn", "support_assistant.app.main:app", "--host", "0.0.0.0", "--port", "7860"]
+

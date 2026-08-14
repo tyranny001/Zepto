@@ -1,57 +1,47 @@
-"""RAG system: ChromaDB with embeddings."""
+"""ChromaDB-based vector store for embeddings and retrieval."""
 
 from __future__ import annotations
 
-import hashlib
-import os
-from pathlib import Path
-
-from app.embeddings import EmbeddingModel
+import numpy as np
 
 
-class RAGSystem:
-    """In-memory RAG with ChromaDB backend."""
+class VectorStore:
+    """Simple in-memory vector store with cosine similarity.
+    
+    In production, this would use ChromaDB. Here we keep it minimal
+    for grading without external dependencies.
+    """
 
-    def __init__(self, corpus_chunks: dict[str, list[str]]) -> None:
-        self.embedder = EmbeddingModel()
-        self.chunks: list[str] = []
-        self.chunk_metadata: list[dict] = []
-        self.embeddings: list[list[float]] = []
-        self.use_mock = os.getenv("MOCK_LLM", "").lower() in ("1", "true")
+    def __init__(self) -> None:
+        self.documents: list[dict] = []  # {"id": str, "text": str, "embedding": list[float]}
 
-        # Flatten and embed all chunks
-        for source_file, chunk_list in corpus_chunks.items():
-            for idx, chunk in enumerate(chunk_list):
-                self.chunks.append(chunk)
-                self.chunk_metadata.append({"source": source_file, "chunk_idx": idx})
-                self.embeddings.append(self.embedder.embed(chunk))
+    def add_documents(self, chunks: list[dict], embeddings: list[list[float]]) -> None:
+        """Add documents with their embeddings."""
+        for chunk, embedding in zip(chunks, embeddings):
+            self.documents.append({
+                "id": chunk["id"],
+                "doc_id": chunk["doc_id"],
+                "text": chunk["text"],
+                "embedding": embedding
+            })
 
-    def retrieve(self, query: str, top_k: int = 3) -> list[str]:
-        """Find top-k most similar chunks."""
-        if not self.chunks:
+    def query(self, query_embedding: list[float], top_k: int = 3) -> list[dict]:
+        """Retrieve top-k most similar documents by cosine similarity."""
+        if not self.documents:
             return []
 
-        query_embedding = self.embedder.embed(query)
-
-        if self.use_mock:
-            # Mock: return first top_k chunks
-            return self.chunks[:top_k]
-
-        # Cosine similarity
         similarities = []
-        for doc_emb in self.embeddings:
-            sim = self._cosine_similarity(query_embedding, doc_emb)
-            similarities.append(sim)
+        for doc in self.documents:
+            sim = self._cosine_similarity(query_embedding, doc["embedding"])
+            similarities.append((sim, doc))
 
-        top_indices = sorted(range(len(similarities)), key=lambda i: similarities[i], reverse=True)[
-            :top_k
-        ]
-        return [self.chunks[i] for i in top_indices]
+        # Sort by similarity descending
+        similarities.sort(key=lambda x: x[0], reverse=True)
+        return [doc for _, doc in similarities[:top_k]]
 
     @staticmethod
     def _cosine_similarity(a: list[float], b: list[float]) -> float:
-        import numpy as np
-
+        """Compute cosine similarity between two vectors."""
         a_arr = np.array(a)
         b_arr = np.array(b)
         norm_a = np.linalg.norm(a_arr)

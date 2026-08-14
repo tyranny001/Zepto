@@ -1,36 +1,39 @@
-"""Chunk corpus files into overlapping text segments."""
+"""Load and chunk corpus documents."""
 
-from __future__ import annotations
-
-import re
 from pathlib import Path
 
 
-def chunk_file(file_path: Path, chunk_size: int = 300, overlap: int = 50) -> list[str]:
-    """Split file into overlapping chunks by word count."""
-    text = file_path.read_text(encoding="utf-8")
+def load_corpus(corpus_dir: Path) -> dict[str, str]:
+    """Load all .txt documents from corpus directory.
+    
+    Returns: dict mapping doc_id (e.g., "doc_01") to full document text.
+    """
+    corpus = {}
+    for txt_file in sorted(corpus_dir.glob("doc_*.txt")):
+        doc_id = txt_file.stem  # e.g., "doc_01"
+        text = txt_file.read_text(encoding="utf-8")
+        corpus[doc_id] = text
+    return corpus
 
-    # Split by words
-    words = re.findall(r"\b\w+\b|[.,!?;:\-]", text)
 
+def chunk_document(doc_text: str, doc_id: str, chunk_size: int = 500) -> list[dict]:
+    """Simple per-document chunking: yield overlapping chunks.
+    
+    Each chunk is a dict with 'id', 'doc_id', and 'text' keys.
+    """
+    words = doc_text.split()
     chunks = []
-    start = 0
-    while start < len(words):
-        end = min(start + chunk_size, len(words))
-        chunk_words = words[start:end]
-        chunk = " ".join(chunk_words)
-        if chunk.strip():
-            chunks.append(chunk)
-        start += chunk_size - overlap
-
+    
+    for i in range(0, len(words), chunk_size // 2):
+        chunk_words = words[i : i + chunk_size]
+        if chunk_words:
+            chunk_text = " ".join(chunk_words)
+            chunk_id = f"{doc_id}_chunk_{len(chunks)}"
+            chunks.append({
+                "id": chunk_id,
+                "doc_id": doc_id,
+                "text": chunk_text
+            })
+    
     return chunks
 
-
-def load_corpus(corpus_dir: Path) -> dict[str, list[str]]:
-    """Load and chunk all .md files in corpus directory."""
-    corpus = {}
-    markdown_files = sorted(corpus_dir.glob("*.md"))
-    for md_file in markdown_files:
-        file_key = md_file.stem
-        corpus[file_key] = chunk_file(md_file)
-    return corpus
