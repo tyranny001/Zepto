@@ -1,0 +1,119 @@
+=== Q1 — SELECT/WHERE: in-stock books rated 4 or 5 ===
+SELECT title, rating, in_stock
+        FROM books
+        WHERE in_stock = 1 AND rating >= 4
+        ORDER BY rating DESC, title
+        LIMIT 15
+                                                                            title  rating  in_stock
+               #HigherSelfie: Wake Up Your Life. Free Your Soul. Find Your Tribe.       5         1
+                                                                       Black Dust       5         1
+                                                       Chase Me (Paris Nights #2)       5         1
+                                                                             Join       5         1
+                                 Princess Between Worlds (Wide-Awake Princess #5)       5         1
+Princess Jellyfish 2-in-1 Omnibus, Vol. 01 (Princess Jellyfish 2-in-1 Omnibus #1)       5         1
+                                                      Private Paris (Private #10)       5         1
+                                                        Rip it Up and Start Again       5         1
+                                            Sapiens: A Brief History of Humankind       5         1
+                          Scott Pilgrim's Precious Little Life (Scott Pilgrim #1)       5         1
+                                                                      Set Me Free       5         1
+                                                                   Sophie's World       5         1
+              The Activist's Tao Te Ching: Ancient Advice for a Modern Revolution       5         1
+                                                                The Elephant Tree       5         1
+                       The Four Agreements: A Practical Guide to Personal Freedom       5         1
+
+=== Q2 — ORDER BY + LIMIT: top 10 highest-rated books ===
+SELECT title, rating, price_inr
+        FROM books
+        ORDER BY rating DESC, price_inr ASC
+        LIMIT 10
+                                                                             title  rating  price_inr
+                                  Princess Between Worlds (Wide-Awake Princess #5)       5    1407.37
+ Princess Jellyfish 2-in-1 Omnibus, Vol. 01 (Princess Jellyfish 2-in-1 Omnibus #1)       5    1435.86
+                                                                    Sophie's World       5    1681.67
+                                                                            Thirst       5    1821.98
+                                                                       Set Me Free       5    1842.03
+                        The Four Agreements: A Practical Guide to Personal Freedom       5    1863.13
+The Inefficiency Assassin: Time Management Tactics for Working Smarter, Not Longer       5    2172.24
+                #HigherSelfie: Wake Up Your Life. Free Your Soul. Find Your Tribe.       5    2438.10
+                                                                 The Elephant Tree       5    2513.01
+                                                        Chase Me (Paris Nights #2)       5    2665.98
+
+=== Q3 — DISTINCT: unique categories in catalogue ===
+SELECT DISTINCT category_name
+        FROM categories
+        ORDER BY category_name
+     category_name
+     Add a comment
+               Art
+          Business
+         Childrens
+      Contemporary
+           Default
+           Fantasy
+           Fiction
+    Food and Drink
+            Health
+Historical Fiction
+           History
+            Horror
+             Music
+           Mystery
+         New Adult
+        Nonfiction
+        Philosophy
+            Poetry
+          Politics
+           Romance
+           Science
+   Science Fiction
+         Self Help
+    Sequential Art
+      Spirituality
+          Thriller
+            Travel
+       Young Adult
+
+=== Q4 — IN: books in Poetry, Travel, or Mystery categories ===
+SELECT b.title, c.category_name, b.price_gbp
+        FROM books b
+        JOIN categories c ON b.category_id = c.category_id
+        WHERE c.category_name IN ('Poetry', 'Travel', 'Mystery')
+        ORDER BY c.category_name, b.title
+        LIMIT 20
+                                  title category_name  price_gbp
+                   In a Dark, Dark Wood       Mystery      19.63
+                          Sharp Objects       Mystery      47.82
+                    The Past Never Ends       Mystery      56.50
+                   A Light in the Attic        Poetry      51.77
+                                   Olio        Poetry      23.88
+                  Shakespeare's Sonnets        Poetry      20.66
+         Slow States of Collapse: Poems        Poetry      57.31
+                        The Black Maria        Poetry      52.15
+Untitled Collection: Sabbath Poems 2014        Poetry      14.27
+         You can't bury them all: Poems        Poetry      33.63
+                It's Only the Himalayas        Travel      45.17
+
+=== Q5 — JOIN + BETWEEN: mid-range INR prices with category names ===
+SELECT b.title, c.category_name, b.price_inr, b.rating
+        FROM books b
+        JOIN categories c ON b.category_id = c.category_id
+        WHERE b.price_inr BETWEEN 500 AND 3000
+          AND b.in_stock = 1
+        ORDER BY b.price_inr DESC
+        LIMIT 15
+                                                                                                                                                 title  category_name  price_inr  rating
+                                                                                                                                 Reasons to Stay Alive     Nonfiction    2786.26       2
+                                                Unbound: How Eight Technologies Made Us Human, Transformed Society, and Brought Our World to the Brink        History    2692.36       1
+                                                                                                                            Chase Me (Paris Nights #2)        Romance    2665.98       5
+                                                                                                         Saga, Volume 6 (Saga (Collected Editions) #6)        Fantasy    2639.61       3
+The Mindfulness and Acceptance Workbook for Anxiety: A Guide to Breaking Free from Anxiety, Phobias, and Worry Using Acceptance and Commitment Therapy  Add a comment    2520.40       4
+                                                                                                                                                  Olio         Poetry    2519.34       1
+                                                                                                                                     The Elephant Tree       Thriller    2513.01       5
+                                                                                    #HigherSelfie: Wake Up Your Life. Free Your Soul. Find Your Tribe.     Nonfiction    2438.10       5
+                                                                                                                                       The Requiem Red    Young Adult    2389.57       1
+                                                        The Boys in the Boat: Nine Americans and Their Epic Quest for Gold at the 1936 Berlin Olympics        Default    2384.30       4
+                                           America's Cradle of Quarterbacks: Western Pennsylvania's Football Factory from Johnny Unitas to Joe Montana        Default    2373.75       3
+                                                                                                             In the Country We Love: My Family Divided     Nonfiction    2321.00       4
+                                                                                                                                 Shakespeare's Sonnets         Poetry    2179.63       4
+                                                                    The Inefficiency Assassin: Time Management Tactics for Working Smarter, Not Longer        Default    2172.24       5
+                                                                                               Lumberjanes Vol. 3: A Terrible Plan (Lumberjanes #9-12) Sequential Art    2101.56       2
